@@ -1,4 +1,4 @@
-export function getListStudents(){
+export default function getListStudents(){
     let array = []
     array.push( { id: 1, firstName: 'Guillaume', location: 'San Francisco' },
     { id: 2, firstName: 'James', location: 'Columbia' },
