@@ -5,10 +5,9 @@ if (process.stdin.isTTY) {
     const x = input.toString().trim();
     console.log(`Your name is: ${x}`);
     process.exit();
-  }); 
+  });
 }
-else
-{
+else{
   process.stdin.on('data', (input) => {
     const x = input.toString().trim();
     console.log(`Your name is: ${x}`);
