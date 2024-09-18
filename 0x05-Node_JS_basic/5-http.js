@@ -1,14 +1,19 @@
+const http = require('http');
 const { readFile } = require('fs');
+
+const hostname = '127.0.0.1';
+const port = 1245;
 
 function countStudents(fileName) {
   const students = {};
   const fields = {};
   let length = 0;
   return new Promise((resolve, reject) => {
-    readFile(fileName, (error, data) => {
-      if (error) {
-        reject(Error('Cannot load the database'));
+    readFile(fileName, (err, data) => {
+      if (err) {
+        reject(err);
       } else {
+        let output = '';
         const lines = data.toString().split('\n');
         for (let i = 0; i < lines.length; i += 1) {
           if (lines[i]) {
@@ -27,49 +32,39 @@ function countStudents(fileName) {
           }
         }
         const l = length - 1;
-        resolve({ students, fields, length: length - 1 });
-      }
-    });
-  });
-}
-
-module.exports = countStudents;
-
-
-
-const http = require('http');
-
-const host = '127.0.0.1';
-const port = 1245;
-
-const app = http.createServer((req, res) => {
-  if (req.url === '/'){
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello Holberton School!');
-  };
-  if (req.url === '/students') {
-    countStudents('database.csv').then(({students,fields,length})=>{
-        let output = `Number of students: ${length}\n`;
-
-        // Iterate through fields and students
+        output += `Number of students: ${l}\n`;
         for (const [key, value] of Object.entries(fields)) {
           if (key !== 'field') {
             output += `Number of students in ${key}: ${value}. `;
             output += `List: ${students[key].join(', ')}\n`;
           }
         }
-
-        // Send the result to the client
-        res.end(output);
-      }).catch((error)=>{
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end(error.message);
+        resolve(output);
       }
-      )
-  }
+    });
+  });
 }
-);
-app.listen(port, host, () => {});
+
+const app = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  if (req.url === '/') {
+    res.write('Hello Holberton School!');
+    res.end();
+  }
+  if (req.url === '/students') {
+    res.write('This is the list of our students\n');
+    countStudents(process.argv[2].toString()).then((output) => {
+      const outString = output.slice(0, -1);
+      res.end(outString);
+    }).catch(() => {
+      res.statusCode = 404;
+      res.end('Cannot load the database');
+    });
+  }
+});
+
+app.listen(port, hostname, () => {
+});
 
 module.exports = app;
