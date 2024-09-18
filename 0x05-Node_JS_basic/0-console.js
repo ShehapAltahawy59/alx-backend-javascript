@@ -1,3 +1,5 @@
-export  default function displayMessage(data){
-    print(data);
+function displayMessage(data){
+    console.log(data);
 }
+
+module.exports = displayMessage;
